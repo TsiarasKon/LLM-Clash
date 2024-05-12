@@ -4,6 +4,8 @@ import os
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
+
+default_model = "gpt-3.5-turbo"
 client_cache = {}
 
 
@@ -40,7 +42,7 @@ def chat():
     try:
         client = get_client(session_id, api_key)
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=request.json.get('model') or default_model,
             messages=session[session_id],
             max_tokens=150,
             temperature=1
