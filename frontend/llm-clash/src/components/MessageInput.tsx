@@ -20,7 +20,7 @@ const MessageInput: React.FC<IMessageInputProps> = ({ onSendMessage, disabled })
         : "bg-gray-800 border-gray-600 focus:ring-blue-500 focus:border-blue-500"}`;
 
     return (
-        <div className="p-4 fixed bottom-0 w-full">
+        <div className="p-4 w-full">
             <input
                 type="text"
                 className={inputClasses}
