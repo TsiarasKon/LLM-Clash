@@ -1,9 +1,11 @@
 from flask import Flask, request, session, jsonify
+from flask_cors import CORS
 from openai import OpenAI
 import os
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
+CORS(app)
 
 default_model = "gpt-3.5-turbo"
 client_cache = {}
@@ -20,24 +22,29 @@ def get_client(session_id, api_key=None):
 @app.route('/')
 def home():
     return 'Welcome to LLM-Clash!'
-    
-    
+
+
+@app.route('/mock/chat')
+def mockChat():
+    return jsonify({'response': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'})
+
+
 @app.route('/chat', methods=['POST'])
 def chat():
     session_id = request.json.get('session_id')
     if not session_id:
-        return jsonify({ 'response': 'Please provide your session_id.' })
+        return jsonify({'response': 'Please provide your session_id.'})
 
     api_key = request.json.get('api_key')
     if not api_key and not session_id not in client_cache:
-        return jsonify({ 'response': 'Please provide an LLM API key.' })
+        return jsonify({'response': 'Please provide an LLM API key.'})
 
     user_input = request.json.get('message')
     if not user_input:
-        return jsonify({ 'response': 'Please provide an input.' })
+        return jsonify({'response': 'Please provide an input.'})
 
     if session_id not in session:
-        session[session_id] = [{ "role": "user", "content": user_input }]
+        session[session_id] = [{"role": "user", "content": user_input}]
 
     try:
         client = get_client(session_id, api_key)
@@ -48,10 +55,12 @@ def chat():
             temperature=1
         )
         response_message = response.choices[0].message.content
-        session[session_id].append({ "role": "system", "content": response_message })
-        return jsonify({ 'response': response_message })
+        session[session_id].append(
+            {"role": "system", "content": response_message})
+        return jsonify({'response': response_message})
     except Exception as e:
-        return jsonify({ 'response': str(e) })
+        return jsonify({'response': str(e)})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

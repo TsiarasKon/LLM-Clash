@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Message from './Message';
 import MessageInput from './MessageInput';
+import { getMockMessage } from '@/services/api';
 
 const ChatInterface: React.FC = () => {
     const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string }[]>([]);
@@ -11,10 +12,14 @@ const ChatInterface: React.FC = () => {
     const sendMessage = (text: string) => {
         setMessages([...messages, { sender: 'user', text: text }]);
         setIsLoading(true);
-        setTimeout(() => {
-            setMessages(prev => [...prev, { sender: 'bot', text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." }]);
-            setIsLoading(false);
-        }, 1000);   // mock delay
+        getMockMessage()
+            .then(response => {
+                setMessages(prev => [...prev, { sender: 'bot', text: response.data.response }]);
+            })
+            .catch(error => {
+                console.error('There was an error!', error);
+            })
+            .finally(() => setIsLoading(false));
     };
 
     useEffect(() => {
