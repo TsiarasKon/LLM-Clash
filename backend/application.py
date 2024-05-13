@@ -1,22 +1,20 @@
-from flask import Flask, request, session, jsonify
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openai import OpenAI
 import os
+import uuid
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 CORS(app)
 
+messages = {}
+clients = {}
 default_model = "gpt-3.5-turbo"
-client_cache = {}
-
-
-def get_client(session_id, api_key=None):
-    if session_id not in client_cache:
-        # There can be a 1:N relation between key:sessions,
-        # but a key can't be changed in the same session
-        client_cache[session_id] = OpenAI(api_key=api_key)
-    return client_cache[session_id]
+chatGPTOptions = {
+    'max_tokens': 150,
+    'temperature': 1
+}
 
 
 @app.route('/')
@@ -29,34 +27,41 @@ def mockChat():
     return jsonify({'response': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'})
 
 
+@app.route('/init-session', methods=['POST'])
+def initSession():
+    # There can be a 1:N relation between key:sessions,
+    # but an api_key can't be changed in the same session
+    api_key = request.json.get('api_key')
+    if not api_key:
+        return jsonify({'response': 'Please provide an "api_key" to initialize your session.'})
+    session_id = str(uuid.uuid4())
+    clients[session_id] = OpenAI(api_key=api_key)
+    messages[session_id] = []
+    return jsonify({'session_id': session_id})
+
+
 @app.route('/chat', methods=['POST'])
 def chat():
     session_id = request.json.get('session_id')
     if not session_id:
-        return jsonify({'response': 'Please provide your session_id.'})
+        return jsonify({'response': 'Please provide your "session_id".'})
 
-    api_key = request.json.get('api_key')
-    if not api_key and not session_id not in client_cache:
-        return jsonify({'response': 'Please provide an LLM API key.'})
+    if session_id not in clients:
+        return jsonify({'response': 'Please initialize your session before chatting.'})
 
     user_input = request.json.get('message')
     if not user_input:
-        return jsonify({'response': 'Please provide an input.'})
-
-    if session_id not in session:
-        session[session_id] = [{"role": "user", "content": user_input}]
+        return jsonify({'response': 'Please provide an input "message".'})
+    messages[session_id].append({"role": "user", "content": user_input})
 
     try:
-        client = get_client(session_id, api_key)
-        response = client.chat.completions.create(
+        response = clients[session_id].chat.completions.create(
             model=request.json.get('model') or default_model,
-            messages=session[session_id],
-            max_tokens=150,
-            temperature=1
+            messages=messages[session_id],
+            **chatGPTOptions
         )
         response_message = response.choices[0].message.content
-        session[session_id].append(
-            {"role": "system", "content": response_message})
+        messages[session_id].append({"role": "system", "content": response_message})
         return jsonify({'response': response_message})
     except Exception as e:
         return jsonify({'response': str(e)})
