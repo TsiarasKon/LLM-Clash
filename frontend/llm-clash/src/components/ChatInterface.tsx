@@ -2,22 +2,31 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Message from './Message';
 import MessageInput from './MessageInput';
-import { getMockMessage } from '@/services/api';
+import { initSession, postChat } from '@/services/api';
 
 const ChatInterface: React.FC = () => {
     const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string }[]>([]);
+    const [apiKey, setApiKey] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const sessionId = sessionStorage.getItem('session-id');
+    // TODO: need to rerender on sessionStorage change
+    
+    window.addEventListener("beforeunload", function(e) {
+        sessionStorage.removeItem('session-id');
+    }); 
 
     const sendMessage = (text: string) => {
         setMessages([...messages, { sender: 'user', text: text }]);
         setIsLoading(true);
-        getMockMessage()
+        // getMockMessage()
+        postChat({ session_id: sessionId!, message: text })
             .then(response => {
                 setMessages(prev => [...prev, { sender: 'bot', text: response.data.response }]);
             })
             .catch(error => {
-                console.error('There was an error!', error);
+                // TODO: proper error handling
+                console.error('Failed to submit message with error: ', error);
             })
             .finally(() => setIsLoading(false));
     };
@@ -38,6 +47,26 @@ const ChatInterface: React.FC = () => {
 
     return (
         <div className="flex flex-col h-screen" style={{ backgroundColor: '#212121' }}>
+            <div className="p-4 flex">
+                <input
+                    type="password"
+                    value={apiKey}
+                    onChange={e => setApiKey(e.target.value)}
+                    disabled={!!sessionId}
+                    // TODO: apply disabled styles
+                    className="px-4 py-2 text-white bg-gray-800 border border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter API Key"
+                />
+                {/* TODO: toggle visibility button */}
+                <button
+                    onClick={() => initSession({ api_key: apiKey })}
+                    disabled={!!sessionId}
+                    className="ml-2 px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none hover:bg-gray-600"
+                >
+                    {!sessionId ? 'Init Session' : 'In Session'}
+                    {/* TODO: restart session */}
+                </button>
+            </div>
             <div className="flex-grow overflow-auto p-4 pb-15">
                 {messages.map((message, index) => (
                     <Message key={index} sender={message.sender} text={message.text} />
@@ -45,7 +74,7 @@ const ChatInterface: React.FC = () => {
                 {isLoading && loadingIndicatorEl}
                 <div ref={messagesEndRef} />
             </div>
-            <MessageInput onSendMessage={sendMessage} disabled={isLoading} />
+            <MessageInput onSendMessage={sendMessage} disabled={isLoading || !sessionId} />
         </div>
     );
 };
