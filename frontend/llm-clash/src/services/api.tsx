@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { IChatRequest, IInitSessionRequest } from './types';
+import { toast } from 'react-toastify';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -12,9 +13,10 @@ export const initSession = (body: IInitSessionRequest) => {
         .then(response => {
             // TODO: sessionStorage is not secure
             sessionStorage.setItem('session-id', response.data.session_id);
+            toast.success("Session initialized!");
         })
         .catch(error => {
-            console.error('Failed to init session with error: ', error);
+            toast.error(`Failed to init session with error: ${error}`);
         });
 };
 

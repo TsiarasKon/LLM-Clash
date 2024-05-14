@@ -1,8 +1,10 @@
 "use client";
+
 import React, { useEffect, useRef, useState } from 'react';
 import Message from './Message';
 import MessageInput from './MessageInput';
 import { initSession, postChat } from '@/services/api';
+import { toast } from 'react-toastify';
 
 const ChatInterface: React.FC = () => {
     const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string }[]>([]);
@@ -25,8 +27,7 @@ const ChatInterface: React.FC = () => {
                 setMessages(prev => [...prev, { sender: 'bot', text: response.data.response }]);
             })
             .catch(error => {
-                // TODO: proper error handling
-                console.error('Failed to submit message with error: ', error);
+                toast.error(`Failed to submit message with error: ${error}`);
             })
             .finally(() => setIsLoading(false));
     };
