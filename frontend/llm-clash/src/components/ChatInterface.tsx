@@ -13,10 +13,13 @@ const ChatInterface: React.FC = () => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const sessionId = sessionStorage.getItem('session-id');
     // TODO: need to rerender on sessionStorage change
-    
-    window.addEventListener("beforeunload", function(e) {
-        sessionStorage.removeItem('session-id');
-    }); 
+
+    useEffect(() => {
+        return () => {
+            // clear session if user moves away from the page
+            sessionStorage.removeItem('session-id');
+        }
+    }, [])
 
     const sendMessage = (text: string) => {
         setMessages([...messages, { sender: 'user', text: text }]);
@@ -47,7 +50,7 @@ const ChatInterface: React.FC = () => {
         </div>;
 
     return (
-        <div className="flex flex-col h-screen" style={{ backgroundColor: '#212121' }}>
+        <div className="flex flex-col h-screen">
             <div className="p-4 flex">
                 <input
                     type="password"
