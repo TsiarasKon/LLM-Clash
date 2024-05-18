@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import StyledInput from './styled/StyledInput';
 
 interface IMessageInputProps {
     disabled: boolean;
@@ -15,21 +16,16 @@ const MessageInput: React.FC<IMessageInputProps> = ({ onSendMessage, disabled })
         }
     };
 
-    const inputClasses = `w-full px-4 py-2 text-white border rounded-lg ${disabled
-        ? "bg-gray-600 border-gray-500 cursor-not-allowed"
-        : "bg-gray-800 border-gray-600 focus:ring-blue-500 focus:border-blue-500"}`;
-
     return (
         <div className="p-4 w-full">
-            <input
+            <StyledInput
                 type="text"
-                className={inputClasses}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder="Type here"
-                style={{color: 'rgba(255, 255, 255, 0.87)'}}
                 disabled={disabled}
+                extraClasses="w-full border rounded-lg"
             />
         </div>
     );
