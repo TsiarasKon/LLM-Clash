@@ -5,21 +5,25 @@ import Message from './Message';
 import MessageInput from './MessageInput';
 import { initSession, postChat } from '@/services/api';
 import { toast } from 'react-toastify';
+import ApiKeyInput from './ApiKeyInput';
 
 const ChatInterface: React.FC = () => {
     const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string }[]>([]);
+    const [sessionId, setSessionId] = useState('');
     const [apiKey, setApiKey] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const sessionId = sessionStorage.getItem('session-id');
-    // TODO: need to rerender on sessionStorage change
 
-    useEffect(() => {
-        return () => {
-            // clear session if user moves away from the page
-            sessionStorage.removeItem('session-id');
-        }
-    }, [])
+    const initCurrentSession = () => {
+        initSession({ api_key: apiKey })
+            .then(response => {
+                setSessionId(response.data.session_id);
+                toast.success("Session initialized!");
+            })
+            .catch(error => {
+                toast.error(`Failed to init session with error: ${error}`);
+            });
+    };
 
     const sendMessage = (text: string) => {
         setMessages([...messages, { sender: 'user', text: text }]);
@@ -52,23 +56,13 @@ const ChatInterface: React.FC = () => {
     return (
         <div className="flex flex-col h-screen">
             <div className="p-4 flex">
-                <input
-                    type="password"
-                    value={apiKey}
-                    onChange={e => setApiKey(e.target.value)}
-                    disabled={!!sessionId}
-                    // TODO: apply disabled styles
-                    className="px-4 py-2 text-white bg-gray-800 border border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter API Key"
-                />
-                {/* TODO: toggle visibility button */}
+                <ApiKeyInput apiKey={apiKey} setApiKey={setApiKey} disabled={!!sessionId} />
                 <button
-                    onClick={() => initSession({ api_key: apiKey })}
-                    disabled={!!sessionId}
+                    onClick={initCurrentSession}
+                    disabled={!!sessionId || !apiKey}
                     className="ml-2 px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none hover:bg-gray-600"
                 >
-                    {!sessionId ? 'Init Session' : 'In Session'}
-                    {/* TODO: restart session */}
+                    {!sessionId ? 'Start Session' : 'In Session'}
                 </button>
             </div>
             <div className="flex-grow overflow-auto p-4 pb-15">
