@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Message from './Message';
 import MessageInput from './MessageInput';
-import { getMockMessage, initClashSession, initSession, postChat } from '@/services/api';
+import { getMockMessage, initClashSession, postChat } from '@/services/api';
 import { toast } from 'react-toastify';
 import ApiKeyInput from './ApiKeyInput';
 import StyledButton from './styled/StyledButton';
@@ -16,6 +16,7 @@ const ClashInterface: React.FC = () => {
     const [apiKeyA, setApiKeyA] = useState('');
     const [apiKeyB, setApiKeyB] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [round, setRound] = useState(0);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const initCurrentSession = () => {
@@ -30,18 +31,35 @@ const ClashInterface: React.FC = () => {
             })
     };
 
-    const sendMessage = (text: string) => {
+    const sendUserMessage = (text: string, modelA: boolean) => {
         setMessages([...messages, { sender: 'user', text: text }]);
         setIsLoading(true);
-        getMockMessage()
-        // postChat({ session_id: sessionId!, message: text })
+        postChat({ session_id: modelA ? sessionIdA : sessionIdB, message: text })
             .then(response => {
                 setMessages(prev => [...prev, { sender: 'bot', text: response.data.response }]);
+                setRound(prev => prev + 1);
             })
             .catch(error => {
                 toast.error(`Failed to submit message with error: ${error}`);
             })
             .finally(() => setIsLoading(false));
+    };
+
+    const sendClashMessage = (modelA: boolean) => {
+        setIsLoading(true);
+        postChat({ session_id: modelA ? sessionIdA : sessionIdB, message: messages[messages.length - 1].text })
+            .then(response => {
+                setMessages(prev => [...prev, { sender: 'bot', text: response.data.response }]);
+                if (modelA) {
+                    sendClashMessage(false);
+                } else {
+                    setIsLoading(false);
+                }
+            })
+            .catch(error => {
+                toast.error(`Failed to submit message with error: ${error}`);
+                setIsLoading(false);
+            });
     };
 
     useEffect(() => {
@@ -89,7 +107,21 @@ const ClashInterface: React.FC = () => {
                 {isLoading && loadingIndicatorEl}
                 <div ref={messagesEndRef} />
             </div>
-            <MessageInput onSendMessage={sendMessage} disabled={isLoading || !inSession()} />
+            {round > 1 && 
+                <StyledButton
+                    onClick={() => sendClashMessage(true)}
+                    extraClasses="w-1/5 m-4 self-center"
+                >
+                    Next Round
+                </StyledButton>
+            }
+            {round < 2 && 
+                <MessageInput 
+                    onSendMessage={(text) => sendUserMessage(text, !round)} 
+                    disabled={isLoading || !inSession()} 
+                    placeholder={`Send initial prompt to model ${round === 0 ? 'A' : 'B'}`} 
+                />
+            }
         </div>
     );
 };
