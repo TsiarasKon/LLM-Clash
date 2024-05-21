@@ -11,6 +11,13 @@ export const initSession = (body: IInitSessionRequest) => {
     return axios.post(`${API_URL}/init-session`, body);
 };
 
+export const initClashSession = (apiKeyA: string, apiKeyB: string) => {
+    return axios.all([
+        initSession({ api_key: apiKeyA }),
+        initSession({ api_key: apiKeyB })
+    ]);
+};
+
 export const postChat = (body: IChatRequest) => {
     return axios.post(`${API_URL}/chat`, body);
 };

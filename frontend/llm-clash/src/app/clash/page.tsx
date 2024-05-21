@@ -1,9 +1,9 @@
-import ChatInterface from "@/components/ChatInterface";
+import ClashInterface from "@/components/ClashInterface";
 import React from "react";
 
 const Clash: React.FC = () => {
     return (
-        <ChatInterface />
+        <ClashInterface />
     );
 }
 

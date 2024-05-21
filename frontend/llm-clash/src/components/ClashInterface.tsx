@@ -3,34 +3,38 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Message from './Message';
 import MessageInput from './MessageInput';
-import { initSession, postChat } from '@/services/api';
+import { getMockMessage, initClashSession, initSession, postChat } from '@/services/api';
 import { toast } from 'react-toastify';
 import ApiKeyInput from './ApiKeyInput';
 import StyledButton from './styled/StyledButton';
+import axios from 'axios';
 
-const ChatInterface: React.FC = () => {
+const ClashInterface: React.FC = () => {
     const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string }[]>([]);
-    const [sessionId, setSessionId] = useState('');
-    const [apiKey, setApiKey] = useState('');
+    const [sessionIdA, setSessionIdA] = useState('');
+    const [sessionIdB, setSessionIdB] = useState('');
+    const [apiKeyA, setApiKeyA] = useState('');
+    const [apiKeyB, setApiKeyB] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const initCurrentSession = () => {
-        initSession({ api_key: apiKey })
-            .then(response => {
-                setSessionId(response.data.session_id);
+        initClashSession(apiKeyA, apiKeyB) 
+            .then(axios.spread((respA, respB) => {
+                setSessionIdA(respA.data.session_id);
+                setSessionIdB(respB.data.session_id);
                 toast.success("Session initialized!");
+            }))
+            .catch(errors => {
+                toast.error(`Failed to initialize session with error: ${errors}`);
             })
-            .catch(error => {
-                toast.error(`Failed to initialize session with error: ${error}`);
-            });
     };
 
     const sendMessage = (text: string) => {
         setMessages([...messages, { sender: 'user', text: text }]);
         setIsLoading(true);
-        // getMockMessage()
-        postChat({ session_id: sessionId!, message: text })
+        getMockMessage()
+        // postChat({ session_id: sessionId!, message: text })
             .then(response => {
                 setMessages(prev => [...prev, { sender: 'bot', text: response.data.response }]);
             })
@@ -43,6 +47,8 @@ const ChatInterface: React.FC = () => {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    const inSession = (): boolean => !!sessionIdA && !!sessionIdB;
 
     const loadingIndicatorEl = 
         <div className="text-center">
@@ -57,12 +63,23 @@ const ChatInterface: React.FC = () => {
     return (
         <div className="flex flex-col h-screen">
             <div className="p-4 flex">
-                <ApiKeyInput apiKey={apiKey} setApiKey={setApiKey} disabled={!!sessionId} />
+                <div className="flex flex-col pr-2">
+                    <div className="text-sm text-gray-400">
+                        Model A
+                    </div>
+                    <ApiKeyInput apiKey={apiKeyA} setApiKey={setApiKeyA} disabled={inSession()} />
+                </div>
+                <div className="flex flex-col">
+                    <div className="text-sm text-gray-400">
+                        Model B
+                    </div>
+                    <ApiKeyInput apiKey={apiKeyB} setApiKey={setApiKeyB} disabled={inSession()} />
+                </div>
                 <StyledButton
                     onClick={initCurrentSession}
-                    disabled={!!sessionId || !apiKey}
+                    disabled={inSession() || !apiKeyA || !apiKeyB}
                 >
-                    {!sessionId ? 'Start Session' : 'In Session'}
+                    {!inSession() ? 'Start Session' : 'In Session'}
                 </StyledButton>
             </div>
             <div className="flex-grow overflow-auto p-4 pb-15">
@@ -72,9 +89,9 @@ const ChatInterface: React.FC = () => {
                 {isLoading && loadingIndicatorEl}
                 <div ref={messagesEndRef} />
             </div>
-            <MessageInput onSendMessage={sendMessage} disabled={isLoading || !sessionId} />
+            <MessageInput onSendMessage={sendMessage} disabled={isLoading || !inSession()} />
         </div>
     );
 };
 
-export default ChatInterface;
+export default ClashInterface;
