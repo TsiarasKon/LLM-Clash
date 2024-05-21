@@ -6,6 +6,7 @@ import MessageInput from './MessageInput';
 import { initSession, postChat } from '@/services/api';
 import { toast } from 'react-toastify';
 import ApiKeyInput from './ApiKeyInput';
+import StyledButton from './styled/StyledButton';
 
 const ChatInterface: React.FC = () => {
     const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string }[]>([]);
@@ -57,13 +58,12 @@ const ChatInterface: React.FC = () => {
         <div className="flex flex-col h-screen">
             <div className="p-4 flex">
                 <ApiKeyInput apiKey={apiKey} setApiKey={setApiKey} disabled={!!sessionId} />
-                <button
+                <StyledButton
                     onClick={initCurrentSession}
                     disabled={!!sessionId || !apiKey}
-                    className="ml-2 px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none hover:bg-gray-600"
                 >
                     {!sessionId ? 'Start Session' : 'In Session'}
-                </button>
+                </StyledButton>
             </div>
             <div className="flex-grow overflow-auto p-4 pb-15">
                 {messages.map((message, index) => (
