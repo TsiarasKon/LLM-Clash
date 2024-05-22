@@ -11,4 +11,5 @@ export interface IInitSessionResponse {
 export interface IChatRequest {
     message: string;
 	session_id: string;     // TODO: send via header
+    system_prompt?: boolean;
 }

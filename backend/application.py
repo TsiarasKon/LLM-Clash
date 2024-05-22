@@ -12,8 +12,8 @@ messages = {}
 clients = {}
 default_model = "gpt-3.5-turbo"
 chatGPTOptions = {
-    'max_tokens': 150,
-    'temperature': 1
+    'max_tokens': 500,
+    'temperature': 1.3
 }
 
 
@@ -52,7 +52,7 @@ def chat():
     user_input = request.json.get('message')
     if not user_input:
         return jsonify({'response': 'Please provide an input "message".'})
-    messages[session_id].append({"role": "user", "content": user_input})
+    messages[session_id].append({"role": "system" if request.json.get('system_prompt') else "user", "content": user_input})
 
     try:
         response = clients[session_id].chat.completions.create(
@@ -61,7 +61,7 @@ def chat():
             **chatGPTOptions
         )
         response_message = response.choices[0].message.content
-        messages[session_id].append({"role": "system", "content": response_message})
+        messages[session_id].append({"role": "assistant", "content": response_message})
         return jsonify({'response': response_message})
     except Exception as e:
         return jsonify({'response': str(e)})

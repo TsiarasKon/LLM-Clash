@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import Message from './Message';
+import Message, { IMessage } from './Message';
 import MessageInput from './MessageInput';
-import { getMockMessage, initClashSession, postChat } from '@/services/api';
+import { initClashSession, postChat } from '@/services/api';
 import { toast } from 'react-toastify';
 import ApiKeyInput from './ApiKeyInput';
 import StyledButton from './styled/StyledButton';
 import axios from 'axios';
 
 const ClashInterface: React.FC = () => {
-    const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string }[]>([]);
+    const [messages, setMessages] = useState<IMessage[]>([]);
     const [sessionIdA, setSessionIdA] = useState('');
     const [sessionIdB, setSessionIdB] = useState('');
     const [apiKeyA, setApiKeyA] = useState('');
@@ -18,6 +18,8 @@ const ClashInterface: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [round, setRound] = useState(0);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const modelAName = "Model A (ChatGPT)";
+    const modelBName = "Model B (ChatGPT)";
 
     const initCurrentSession = () => {
         initClashSession(apiKeyA, apiKeyB) 
@@ -32,11 +34,12 @@ const ClashInterface: React.FC = () => {
     };
 
     const sendUserMessage = (text: string, modelA: boolean) => {
-        setMessages([...messages, { sender: 'user', text: text }]);
+        setMessages([...messages, { senderType: 'user', senderName: 'You', text: text }]);
         setIsLoading(true);
-        postChat({ session_id: modelA ? sessionIdA : sessionIdB, message: text })
+        postChat({ session_id: modelA ? sessionIdA : sessionIdB, message: text, system_prompt: true })
             .then(response => {
-                setMessages(prev => [...prev, { sender: 'bot', text: response.data.response }]);
+                const sender: { senderType: 'user' | 'A' | 'B', senderName: string } = modelA ? { senderType: 'A', senderName: modelAName } : { senderType: 'B', senderName: modelBName };
+                setMessages(prev => [...prev, { ...sender, text: response.data.response }]);
                 setRound(prev => prev + 1);
             })
             .catch(error => {
@@ -45,21 +48,18 @@ const ClashInterface: React.FC = () => {
             .finally(() => setIsLoading(false));
     };
 
-    const sendClashMessage = (modelA: boolean) => {
+    const sendClashMessage = () => {
         setIsLoading(true);
-        postChat({ session_id: modelA ? sessionIdA : sessionIdB, message: messages[messages.length - 1].text })
+        postChat({ session_id: round % 2 === 0 ? sessionIdA : sessionIdB, message: messages[messages.length - 1].text })
             .then(response => {
-                setMessages(prev => [...prev, { sender: 'bot', text: response.data.response }]);
-                if (modelA) {
-                    sendClashMessage(false);
-                } else {
-                    setIsLoading(false);
-                }
+                const sender: { senderType: 'user' | 'A' | 'B', senderName: string } = (round % 2 === 0) ? { senderType: 'A', senderName: modelAName } : { senderType: 'B', senderName: modelBName };
+                setMessages(prev => [...prev, { ...sender, text: response.data.response }]);
+                setRound(prev => prev + 1);
             })
             .catch(error => {
                 toast.error(`Failed to submit message with error: ${error}`);
-                setIsLoading(false);
-            });
+            })
+            .finally(() => setIsLoading(false));
     };
 
     useEffect(() => {
@@ -102,17 +102,17 @@ const ClashInterface: React.FC = () => {
             </div>
             <div className="flex-grow overflow-auto p-4 pb-15">
                 {messages.map((message, index) => (
-                    <Message key={index} sender={message.sender} text={message.text} />
+                    <Message key={index} message={message} />
                 ))}
                 {isLoading && loadingIndicatorEl}
                 <div ref={messagesEndRef} />
             </div>
             {round > 1 && 
                 <StyledButton
-                    onClick={() => sendClashMessage(true)}
+                    onClick={() => sendClashMessage()}
                     extraClasses="w-1/5 m-4 self-center"
                 >
-                    Next Round
+                    Next Message
                 </StyledButton>
             }
             {round < 2 && 
