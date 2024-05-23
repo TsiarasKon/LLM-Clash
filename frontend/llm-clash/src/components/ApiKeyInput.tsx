@@ -1,13 +1,13 @@
 import React from 'react';
 import StyledInput from './styled/StyledInput';
 
-interface IApiKeyInputProps {
+export interface IApiKeyInputProps {
     apiKey: string;
     setApiKey: React.Dispatch<React.SetStateAction<string>>;
-    disabled: boolean;
+    disabled?: boolean;
 }
 
-const ApiKeyInput: React.FC<IApiKeyInputProps> = ({ apiKey, setApiKey, disabled }) => {
+const ApiKeyInput: React.FC<IApiKeyInputProps> = ({ apiKey, setApiKey, disabled = false }) => {
     return (
         <StyledInput
             type="password"
@@ -15,6 +15,7 @@ const ApiKeyInput: React.FC<IApiKeyInputProps> = ({ apiKey, setApiKey, disabled 
             disabled={disabled}
             onChange={(e: any) => setApiKey(e.target.value)}
             placeholder="Enter API Key"
+            extraClasses="rounded-r-lg"
         />
         // TODO: toggle visibility button
     );

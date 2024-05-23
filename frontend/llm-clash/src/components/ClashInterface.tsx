@@ -5,9 +5,9 @@ import Message, { IMessage } from './Message';
 import MessageInput from './MessageInput';
 import { initClashSession, postChat } from '@/services/api';
 import { toast } from 'react-toastify';
-import ApiKeyInput from './ApiKeyInput';
 import StyledButton from './styled/StyledButton';
 import axios from 'axios';
+import ModelPicker from './ModelPicker';
 
 const ClashInterface: React.FC = () => {
     const [messages, setMessages] = useState<IMessage[]>([]);
@@ -34,7 +34,7 @@ const ClashInterface: React.FC = () => {
     };
 
     const sendUserMessage = (text: string, modelA: boolean) => {
-        setMessages([...messages, { senderType: 'user', senderName: 'You', text: text }]);
+        setMessages([...messages, { senderType: 'user', senderName: `You (to ${modelA ? 'A' : 'B'})`, text: text }]);
         setIsLoading(true);
         postChat({ session_id: modelA ? sessionIdA : sessionIdB, message: text, system_prompt: true })
             .then(response => {
@@ -85,13 +85,13 @@ const ClashInterface: React.FC = () => {
                     <div className="text-sm text-gray-400">
                         Model A
                     </div>
-                    <ApiKeyInput apiKey={apiKeyA} setApiKey={setApiKeyA} disabled={inSession()} />
+                    <ModelPicker apiKey={apiKeyA} setApiKey={setApiKeyA} disabled={inSession()} />
                 </div>
                 <div className="flex flex-col">
                     <div className="text-sm text-gray-400">
                         Model B
                     </div>
-                    <ApiKeyInput apiKey={apiKeyB} setApiKey={setApiKeyB} disabled={inSession()} />
+                    <ModelPicker apiKey={apiKeyB} setApiKey={setApiKeyB} disabled={inSession()} />
                 </div>
                 <StyledButton
                     onClick={initCurrentSession}
