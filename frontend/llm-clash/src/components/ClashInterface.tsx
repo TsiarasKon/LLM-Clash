@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import StyledButton from './styled/StyledButton';
 import axios from 'axios';
 import ModelPicker from './ModelPicker';
+import { ISender } from '@/types';
 
 const ClashInterface: React.FC = () => {
     const [messages, setMessages] = useState<IMessage[]>([]);
@@ -34,12 +35,12 @@ const ClashInterface: React.FC = () => {
     };
 
     const sendUserMessage = (text: string, modelA: boolean) => {
-        setMessages([...messages, { senderType: 'user', senderName: `You (to ${modelA ? 'A' : 'B'})`, text: text }]);
+        setMessages([...messages, { sender: { type: 'User', name: `You (to ${modelA ? 'A' : 'B'})` }, text: text }]);
         setIsLoading(true);
         postChat({ session_id: modelA ? sessionIdA : sessionIdB, message: text, system_prompt: true })
             .then(response => {
-                const sender: { senderType: 'user' | 'A' | 'B', senderName: string } = modelA ? { senderType: 'A', senderName: modelAName } : { senderType: 'B', senderName: modelBName };
-                setMessages(prev => [...prev, { ...sender, text: response.data.response }]);
+                const sender: ISender = modelA ? { type: 'A', name: modelAName } : { type: 'B', name: modelBName };
+                setMessages(prev => [...prev, { sender, text: response.data.response }]);
                 setRound(prev => prev + 1);
             })
             .catch(error => {
@@ -52,8 +53,8 @@ const ClashInterface: React.FC = () => {
         setIsLoading(true);
         postChat({ session_id: round % 2 === 0 ? sessionIdA : sessionIdB, message: messages[messages.length - 1].text })
             .then(response => {
-                const sender: { senderType: 'user' | 'A' | 'B', senderName: string } = (round % 2 === 0) ? { senderType: 'A', senderName: modelAName } : { senderType: 'B', senderName: modelBName };
-                setMessages(prev => [...prev, { ...sender, text: response.data.response }]);
+                const sender: ISender = (round % 2 === 0) ? { type: 'A', name: modelAName } : { type: 'B', name: modelBName };
+                setMessages(prev => [...prev, { sender, text: response.data.response }]);
                 setRound(prev => prev + 1);
             })
             .catch(error => {

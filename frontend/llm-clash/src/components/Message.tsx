@@ -1,10 +1,10 @@
 import React from 'react';
-import chatGPT from '../assets/avatars/chatGPT.png';
+import ChatGPT from '../assets/avatars/chatGPT.png';
 import user from '../assets/avatars/user.png';
+import { ISender } from '@/types';
 
 export interface IMessage {
-    senderType: 'user' | 'A' | 'B';
-    senderName: string;
+    sender: ISender;
     text: string;
 }
 
@@ -13,28 +13,28 @@ export interface IMessageProps {
 }
 
 const Message: React.FC<IMessageProps> = ({ message }) => {
-    const { senderType, senderName, text } = message;
-    const avatarUrl = senderType === 'user' ? user : chatGPT;
+    const { sender, text } = message;
+    const avatarUrl = sender.type === 'User' ? user : ChatGPT;
     const avatarEl = (extraClasses: string) => <img src={avatarUrl.src} alt="Avatar" className={`w-8 h-8 rounded-full mb-1 ${extraClasses}`} />;
 
     const messageColors = {
-        'user': 'bg-blue-700',
+        'User': 'bg-blue-700',
         'A': 'bg-gray-700',
         'B': 'bg-red-700'
     }
 
     return (
-        <div className={`flex mb-2 items-end ${senderType === 'A' ? 'justify-start mr-24' : 'justify-end ml-24'}`}>
-            {senderType === 'A' && avatarEl("mr-2")}
+        <div className={`flex mb-2 items-end ${sender.type === 'A' ? 'justify-start mr-24' : 'justify-end ml-24'}`}>
+            {sender.type === 'A' && avatarEl("mr-2")}
             <div className="flex flex-col">
-                <div className={`text-sm text-gray-400 ${senderType !== 'A' && 'text-right'}`}>
-                    {senderName}
+                <div className={`text-sm text-gray-400 ${sender.type !== 'A' && 'text-right'}`}>
+                    {sender.name}
                 </div>
-                <div className={`px-4 py-2 rounded-lg text-white ${messageColors[senderType]}`}>
+                <div className={`px-4 py-2 rounded-lg text-white ${messageColors[sender.type]}`}>
                     {text}
                 </div>
             </div>
-            {senderType !== 'A' && avatarEl("ml-2")}
+            {sender.type !== 'A' && avatarEl("ml-2")}
         </div>
     );
 }

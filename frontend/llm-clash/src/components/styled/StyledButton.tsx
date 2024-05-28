@@ -6,7 +6,7 @@ interface IStyledInputProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const StyledButton: React.FC<IStyledInputProps> = ({ children, disabled = false, extraClasses = '', ...props }) => {
     const classes = `ml-2 px-3 py-2 text-white rounded-lg ${extraClasses} ${disabled
-        ? "opacity-50 bg-gray-700 cursor-not-allowed"
+        ? "opacity-50 bg-gray-700"
         : "bg-gray-700 focus:outline-none hover:bg-gray-600"}`;
 
     return (

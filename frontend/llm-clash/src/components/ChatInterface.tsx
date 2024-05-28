@@ -5,8 +5,8 @@ import Message from './Message';
 import MessageInput from './MessageInput';
 import { initSession, postChat } from '@/services/api';
 import { toast } from 'react-toastify';
-import ApiKeyInput from './ApiKeyInput';
 import StyledButton from './styled/StyledButton';
+import ModelPicker from './ModelPicker';
 
 const ChatInterface: React.FC = () => {
     const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string }[]>([]);
@@ -14,6 +14,7 @@ const ChatInterface: React.FC = () => {
     const [apiKey, setApiKey] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const modelName = "ChatGPT";
 
     const initCurrentSession = () => {
         initSession({ api_key: apiKey })
@@ -57,7 +58,7 @@ const ChatInterface: React.FC = () => {
     return (
         <div className="flex flex-col h-screen">
             <div className="p-4 flex">
-                <ApiKeyInput apiKey={apiKey} setApiKey={setApiKey} disabled={!!sessionId} />
+                <ModelPicker apiKey={apiKey} setApiKey={setApiKey} disabled={!!sessionId} />
                 <StyledButton
                     onClick={initCurrentSession}
                     disabled={!!sessionId || !apiKey}
@@ -67,7 +68,7 @@ const ChatInterface: React.FC = () => {
             </div>
             <div className="flex-grow overflow-auto p-4 pb-15">
                 {messages.map((message, index) => (
-                    <Message key={index} sender={message.sender} text={message.text} />
+                    <Message key={index} message={{ text: message.text, sender: (message.sender === 'user') ? { name: 'You', type: 'User' } : { name: modelName, type: 'A' } }} />
                 ))}
                 {isLoading && loadingIndicatorEl}
                 <div ref={messagesEndRef} />
