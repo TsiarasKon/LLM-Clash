@@ -2,6 +2,7 @@
 
 export interface IInitSessionRequest {
 	api_key: string;
+    chatbot?: string;
 }
 
 export interface IInitSessionResponse {
@@ -11,5 +12,6 @@ export interface IInitSessionResponse {
 export interface IChatRequest {
     message: string;
 	session_id: string;     // TODO: send via header
+    model?: string;
     system_prompt?: boolean;
 }

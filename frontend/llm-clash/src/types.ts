@@ -1,5 +1,5 @@
 export interface ISession {
-    sessionId: number;
+    sessionId: string;
     chatbot: string;
     model: string;
 }
@@ -7,4 +7,10 @@ export interface ISession {
 export interface ISender {
     type: 'User' | 'A' | 'B';
     name: string;
+    avatar?: string;
+}
+
+export interface IMessage {
+    sender: ISender;
+    text: string;
 }

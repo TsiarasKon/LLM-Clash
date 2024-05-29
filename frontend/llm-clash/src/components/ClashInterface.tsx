@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import Message, { IMessage } from './Message';
+import Message from './Message';
 import MessageInput from './MessageInput';
 import { initClashSession, postChat } from '@/services/api';
 import { toast } from 'react-toastify';
 import StyledButton from './styled/StyledButton';
 import axios from 'axios';
 import ModelPicker from './ModelPicker';
-import { ISender } from '@/types';
+import { IMessage, ISender } from '@/types';
 
 const ClashInterface: React.FC = () => {
     const [messages, setMessages] = useState<IMessage[]>([]);

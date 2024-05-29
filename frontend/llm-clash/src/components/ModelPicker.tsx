@@ -1,31 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import StyledSelect from './styled/StyledSelect';
 import ApiKeyInput, { IApiKeyInputProps } from './ApiKeyInput';
+import { Chatbots, Models } from '@/constants';
+import { useChatSession } from '@/context/ChatSessionContext';
 
 interface IModelPickerProps extends IApiKeyInputProps { }
 
 const ModelPicker: React.FC<IModelPickerProps> = ({ apiKey, setApiKey, disabled = false }) => {
-    const chatbots = [{ value: "ChatGPT", text: "ChatGPT" }, { value: "Claude", text: "Claude" }]
-    const models = {
-        "ChatGPT": [{ value: "3.5", text: "3.5" }, { value: "4", text: "4" }],
-        "Claude": [{ value: "Haiku", text: "Haiku" }],
-    };
-
-    const [chatbot, setChatbot] = useState(chatbots[0].value);
-    const [model, setModel] = useState(models["ChatGPT"][0].value);
+    const { state, setChatbot, setModel } = useChatSession();   // TODO: props?
 
     return (
         <div className="flex flex-row">
             <StyledSelect 
-                options={chatbots}
-                value={chatbot}
+                options={Chatbots}
+                value={state.chatbot}
                 onChange={(e: any) => setChatbot(e.target.value)}
                 disabled={disabled}
                 extraClasses="rounded-l-lg"
             />
             <StyledSelect 
-                options={models[chatbot as keyof typeof models]}
-                value={model}
+                options={Models[state.chatbot as keyof typeof Models]}
+                value={state.model}
                 onChange={(e: any) => setModel(e.target.value)}
                 disabled={disabled}
             />

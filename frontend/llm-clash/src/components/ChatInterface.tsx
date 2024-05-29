@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useRef, useState } from 'react';
 import Message from './Message';
 import MessageInput from './MessageInput';
@@ -7,14 +5,14 @@ import { initSession, postChat } from '@/services/api';
 import { toast } from 'react-toastify';
 import StyledButton from './styled/StyledButton';
 import ModelPicker from './ModelPicker';
+import { useChatSession } from '@/context/ChatSessionContext';
 
 const ChatInterface: React.FC = () => {
-    const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string }[]>([]);
-    const [sessionId, setSessionId] = useState('');
+    const { state, setSessionId, getModelName } = useChatSession();
+    const [messages, setMessages] = useState<{ sender: 'User' | 'bot', text: string }[]>([]);
     const [apiKey, setApiKey] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const modelName = "ChatGPT";
 
     const initCurrentSession = () => {
         initSession({ api_key: apiKey })
@@ -28,10 +26,10 @@ const ChatInterface: React.FC = () => {
     };
 
     const sendMessage = (text: string) => {
-        setMessages([...messages, { sender: 'user', text: text }]);
+        setMessages([...messages, { sender: 'User', text: text }]);
         setIsLoading(true);
         // getMockMessage()
-        postChat({ session_id: sessionId!, message: text })
+        postChat({ session_id: state.sessionId, message: text })
             .then(response => {
                 setMessages(prev => [...prev, { sender: 'bot', text: response.data.response }]);
             })
@@ -58,22 +56,22 @@ const ChatInterface: React.FC = () => {
     return (
         <div className="flex flex-col h-screen">
             <div className="p-4 flex">
-                <ModelPicker apiKey={apiKey} setApiKey={setApiKey} disabled={!!sessionId} />
+                <ModelPicker apiKey={apiKey} setApiKey={setApiKey} disabled={!!state.sessionId} />
                 <StyledButton
                     onClick={initCurrentSession}
-                    disabled={!!sessionId || !apiKey}
+                    disabled={!!state.sessionId || !apiKey}
                 >
-                    {!sessionId ? 'Start Session' : 'In Session'}
+                    {!state.sessionId ? 'Start Session' : 'In Session'}
                 </StyledButton>
             </div>
             <div className="flex-grow overflow-auto p-4 pb-15">
                 {messages.map((message, index) => (
-                    <Message key={index} message={{ text: message.text, sender: (message.sender === 'user') ? { name: 'You', type: 'User' } : { name: modelName, type: 'A' } }} />
+                    <Message key={index} message={{ text: message.text, sender: (message.sender === 'User') ? { name: 'You', type: 'User', avatar: 'User' } : { name: getModelName(), type: 'A', avatar: state.chatbot } }} />
                 ))}
                 {isLoading && loadingIndicatorEl}
                 <div ref={messagesEndRef} />
             </div>
-            <MessageInput onSendMessage={sendMessage} disabled={isLoading || !sessionId} />
+            <MessageInput onSendMessage={sendMessage} disabled={isLoading || !state.sessionId} />
         </div>
     );
 };

@@ -1,12 +1,8 @@
 import React from 'react';
-import ChatGPT from '../assets/avatars/chatGPT.png';
 import user from '../assets/avatars/user.png';
-import { ISender } from '@/types';
-
-export interface IMessage {
-    sender: ISender;
-    text: string;
-}
+import chatGPT from '../assets/avatars/chatGPT.png';
+import claude from '../assets/avatars/claude.png';
+import { IMessage } from '@/types';
 
 export interface IMessageProps {
     message: IMessage;
@@ -14,14 +10,20 @@ export interface IMessageProps {
 
 const Message: React.FC<IMessageProps> = ({ message }) => {
     const { sender, text } = message;
-    const avatarUrl = sender.type === 'User' ? user : ChatGPT;
-    const avatarEl = (extraClasses: string) => <img src={avatarUrl.src} alt="Avatar" className={`w-8 h-8 rounded-full mb-1 ${extraClasses}`} />;
 
     const messageColors = {
         'User': 'bg-blue-700',
         'A': 'bg-gray-700',
         'B': 'bg-red-700'
     }
+
+    const avatarUrl = {
+        'User': user,
+        'ChatGPT': chatGPT,
+        'Claude': claude
+    }
+
+    const avatarEl = (extraClasses: string) => <img src={avatarUrl[sender.avatar as keyof typeof avatarUrl].src} alt="Avatar" className={`w-8 h-8 rounded-full mb-1 ${extraClasses}`} />;
 
     return (
         <div className={`flex mb-2 items-end ${sender.type === 'A' ? 'justify-start mr-24' : 'justify-end ml-24'}`}>
