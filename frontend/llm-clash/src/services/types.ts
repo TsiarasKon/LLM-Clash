@@ -10,8 +10,8 @@ export interface IInitSessionResponse {
 }
 
 export interface IChatRequest {
-    message: string;
 	session_id: string;     // TODO: send via header
+    message: string;
     model?: string;
     system_prompt?: boolean;
 }

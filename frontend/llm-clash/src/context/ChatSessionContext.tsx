@@ -1,4 +1,4 @@
-import { DefaultChatbot, DefaultModel } from '@/constants';
+import { DefaultChatbot, DefaultModel, Models } from '@/constants';
 import { ISession } from '@/types';
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
@@ -33,7 +33,7 @@ export const createChatSessionContext = () => {
         };
 
         const getModelName = (): string => {
-            return `${state.chatbot} ${state.model}`;
+            return `${state.chatbot} ${Models[state.chatbot as keyof typeof Models].find(el => el.value === state.model)!.text}`;
         }
 
         return (

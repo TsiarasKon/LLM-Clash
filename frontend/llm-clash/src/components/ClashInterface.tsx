@@ -22,7 +22,7 @@ const ClashInterface: React.FC = () => {
     const getModelBLabel = () => `Model B (${getModelNameB()})`;
 
     const initCurrentSession = () => {
-        initClashSession(apiKeyA, apiKeyB) 
+        initClashSession({ api_key: apiKeyA, chatbot: stateA.chatbot }, { api_key: apiKeyB, chatbot: stateB.chatbot }) 
             .then(axios.spread((respA, respB) => {
                 setSessionIdA(respA.data.session_id);
                 setSessionIdB(respB.data.session_id);
@@ -36,7 +36,11 @@ const ClashInterface: React.FC = () => {
     const sendUserMessage = (text: string, modelA: boolean) => {
         setMessages([...messages, { sender: { type: 'User', name: `You (to ${modelA ? 'A' : 'B'})`, avatar: 'User' }, text: text }]);
         setIsLoading(true);
-        postChat({ session_id: modelA ? stateA.sessionId : stateB.sessionId, message: text, system_prompt: true })
+        postChat({ 
+            ...(modelA ? { session_id: stateA.sessionId, model: stateA.model } : { session_id: stateB.sessionId, model: stateB.model }), 
+            message: text,
+            system_prompt: true 
+        })
             .then(response => {
                 const sender: ISender = modelA ? { type: 'A', name: getModelALabel(), avatar: stateA.chatbot } : { type: 'B', name: getModelBLabel(), avatar: stateB.chatbot };
                 setMessages(prev => [...prev, { sender, text: response.data.response }]);
@@ -50,7 +54,10 @@ const ClashInterface: React.FC = () => {
 
     const sendClashMessage = () => {
         setIsLoading(true);
-        postChat({ session_id: round % 2 === 0 ? stateA.sessionId : stateB.sessionId, message: messages[messages.length - 1].text })
+        postChat({ 
+            ...(round % 2 === 0 ? { session_id: stateA.sessionId, model: stateA.model } : { session_id: stateB.sessionId, model: stateB.model }), 
+            message: messages[messages.length - 1].text 
+        })
             .then(response => {
                 const sender: ISender = (round % 2 === 0) ? { type: 'A', name: getModelALabel(), avatar: stateA.chatbot } : { type: 'B', name: getModelBLabel(), avatar: stateB.chatbot };
                 setMessages(prev => [...prev, { sender, text: response.data.response }]);

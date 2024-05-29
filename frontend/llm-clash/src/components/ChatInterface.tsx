@@ -15,7 +15,7 @@ const ChatInterface: React.FC = () => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const initCurrentSession = () => {
-        initSession({ api_key: apiKey })
+        initSession({ api_key: apiKey, chatbot: state.chatbot })
             .then(response => {
                 setSessionId(response.data.session_id);
                 toast.success("Session initialized!");
@@ -28,8 +28,7 @@ const ChatInterface: React.FC = () => {
     const sendMessage = (text: string) => {
         setMessages([...messages, { sender: 'User', text: text }]);
         setIsLoading(true);
-        // getMockMessage()
-        postChat({ session_id: state.sessionId, message: text })
+        postChat({ session_id: state.sessionId, message: text, model: state.model })
             .then(response => {
                 setMessages(prev => [...prev, { sender: 'bot', text: response.data.response }]);
             })

@@ -11,10 +11,10 @@ export const initSession = (body: IInitSessionRequest) => {
     return axios.post(`${API_URL}/init-session`, body);
 };
 
-export const initClashSession = (apiKeyA: string, apiKeyB: string) => {
+export const initClashSession = (bodyA: IInitSessionRequest, bodyB: IInitSessionRequest) => {
     return axios.all([
-        initSession({ api_key: apiKeyA }),
-        initSession({ api_key: apiKeyB })
+        initSession(bodyA),
+        initSession(bodyB)
     ]);
 };
 
