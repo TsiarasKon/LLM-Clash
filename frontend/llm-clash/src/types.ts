@@ -7,7 +7,7 @@ export interface ISession {
 export interface ISender {
     type: 'User' | 'A' | 'B';
     name: string;
-    avatar?: string;
+    avatar: string;
 }
 
 export interface IMessage {

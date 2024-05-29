@@ -8,7 +8,7 @@ import ModelPicker from './ModelPicker';
 import { useChatSession } from '@/context/ChatSessionContext';
 
 const ChatInterface: React.FC = () => {
-    const { state, setSessionId, getModelName } = useChatSession();
+    const { state, setSessionId, setChatbot, setModel, getModelName } = useChatSession();
     const [messages, setMessages] = useState<{ sender: 'User' | 'bot', text: string }[]>([]);
     const [apiKey, setApiKey] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +56,7 @@ const ChatInterface: React.FC = () => {
     return (
         <div className="flex flex-col h-screen">
             <div className="p-4 flex">
-                <ModelPicker apiKey={apiKey} setApiKey={setApiKey} disabled={!!state.sessionId} />
+                <ModelPicker chatbot={state.chatbot} setChatbot={setChatbot} model={state.model} setModel={setModel} apiKey={apiKey} setApiKey={setApiKey} disabled={!!state.sessionId} />
                 <StyledButton
                     onClick={initCurrentSession}
                     disabled={!!state.sessionId || !apiKey}

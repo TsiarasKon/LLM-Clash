@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useRef, useState } from 'react';
 import Message from './Message';
 import MessageInput from './MessageInput';
@@ -9,18 +7,19 @@ import StyledButton from './styled/StyledButton';
 import axios from 'axios';
 import ModelPicker from './ModelPicker';
 import { IMessage, ISender } from '@/types';
+import { useChatSessionA, useChatSessionB } from '@/context/ClashSessionContext';
 
 const ClashInterface: React.FC = () => {
+    const { state: stateA, setSessionId: setSessionIdA, setChatbot: setChatbotA, setModel: setModelA, getModelName: getModelNameA } = useChatSessionA();
+    const { state: stateB, setSessionId: setSessionIdB, setChatbot: setChatbotB, setModel: setModelB, getModelName: getModelNameB } = useChatSessionB();
     const [messages, setMessages] = useState<IMessage[]>([]);
-    const [sessionIdA, setSessionIdA] = useState('');
-    const [sessionIdB, setSessionIdB] = useState('');
     const [apiKeyA, setApiKeyA] = useState('');
     const [apiKeyB, setApiKeyB] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [round, setRound] = useState(0);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const modelAName = "Model A (ChatGPT)";
-    const modelBName = "Model B (ChatGPT)";
+    const getModelALabel = () => `Model A (${getModelNameA()})`;
+    const getModelBLabel = () => `Model B (${getModelNameB()})`;
 
     const initCurrentSession = () => {
         initClashSession(apiKeyA, apiKeyB) 
@@ -35,11 +34,11 @@ const ClashInterface: React.FC = () => {
     };
 
     const sendUserMessage = (text: string, modelA: boolean) => {
-        setMessages([...messages, { sender: { type: 'User', name: `You (to ${modelA ? 'A' : 'B'})` }, text: text }]);
+        setMessages([...messages, { sender: { type: 'User', name: `You (to ${modelA ? 'A' : 'B'})`, avatar: 'User' }, text: text }]);
         setIsLoading(true);
-        postChat({ session_id: modelA ? sessionIdA : sessionIdB, message: text, system_prompt: true })
+        postChat({ session_id: modelA ? stateA.sessionId : stateB.sessionId, message: text, system_prompt: true })
             .then(response => {
-                const sender: ISender = modelA ? { type: 'A', name: modelAName } : { type: 'B', name: modelBName };
+                const sender: ISender = modelA ? { type: 'A', name: getModelALabel(), avatar: stateA.chatbot } : { type: 'B', name: getModelBLabel(), avatar: stateB.chatbot };
                 setMessages(prev => [...prev, { sender, text: response.data.response }]);
                 setRound(prev => prev + 1);
             })
@@ -51,9 +50,9 @@ const ClashInterface: React.FC = () => {
 
     const sendClashMessage = () => {
         setIsLoading(true);
-        postChat({ session_id: round % 2 === 0 ? sessionIdA : sessionIdB, message: messages[messages.length - 1].text })
+        postChat({ session_id: round % 2 === 0 ? stateA.sessionId : stateB.sessionId, message: messages[messages.length - 1].text })
             .then(response => {
-                const sender: ISender = (round % 2 === 0) ? { type: 'A', name: modelAName } : { type: 'B', name: modelBName };
+                const sender: ISender = (round % 2 === 0) ? { type: 'A', name: getModelALabel(), avatar: stateA.chatbot } : { type: 'B', name: getModelBLabel(), avatar: stateB.chatbot };
                 setMessages(prev => [...prev, { sender, text: response.data.response }]);
                 setRound(prev => prev + 1);
             })
@@ -67,7 +66,7 @@ const ClashInterface: React.FC = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const inSession = (): boolean => !!sessionIdA && !!sessionIdB;
+    const inSession = (): boolean => !!stateA.sessionId && !!stateB.sessionId;
 
     const loadingIndicatorEl = 
         <div className="text-center">
@@ -86,13 +85,13 @@ const ClashInterface: React.FC = () => {
                     <div className="text-sm text-gray-400">
                         Model A
                     </div>
-                    <ModelPicker apiKey={apiKeyA} setApiKey={setApiKeyA} disabled={inSession()} />
+                    <ModelPicker chatbot={stateA.chatbot} setChatbot={setChatbotA} model={stateA.model} setModel={setModelA} apiKey={apiKeyA} setApiKey={setApiKeyA} disabled={!!stateA.sessionId} />
                 </div>
                 <div className="flex flex-col">
                     <div className="text-sm text-gray-400">
                         Model B
                     </div>
-                    <ModelPicker apiKey={apiKeyB} setApiKey={setApiKeyB} disabled={inSession()} />
+                    <ModelPicker chatbot={stateB.chatbot} setChatbot={setChatbotB} model={stateB.model} setModel={setModelB} apiKey={apiKeyB} setApiKey={setApiKeyB} disabled={!!stateB.sessionId} />
                 </div>
                 <StyledButton
                     onClick={initCurrentSession}

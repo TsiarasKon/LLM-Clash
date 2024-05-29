@@ -10,42 +10,48 @@ interface IChatSessionContextProps {
     getModelName: () => string;
 }
 
-const ChatSessionContext = createContext<IChatSessionContextProps | undefined>(undefined);
+export const createChatSessionContext = () => {
+    const ChatSessionContext = createContext<IChatSessionContextProps | undefined>(undefined);
 
-export const ChatSessionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [state, setState] = useState<ISession>({
-        sessionId: '',
-        chatbot: DefaultChatbot,
-        model: DefaultModel,
-    });
+    const ChatSessionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+        const [state, setState] = useState<ISession>({
+            sessionId: '',
+            chatbot: DefaultChatbot,
+            model: DefaultModel,
+        });
 
-    const setSessionId = (sessionId: string) => {
-        setState((prevState) => ({ ...prevState, sessionId }));
+        const setSessionId = (sessionId: string) => {
+            setState((prevState) => ({ ...prevState, sessionId }));
+        };
+
+        const setChatbot = (chatbot: string) => {
+            setState((prevState) => ({ ...prevState, chatbot }));
+        };
+
+        const setModel = (model: string) => {
+            setState((prevState) => ({ ...prevState, model }));
+        };
+
+        const getModelName = (): string => {
+            return `${state.chatbot} ${state.model}`;
+        }
+
+        return (
+            <ChatSessionContext.Provider value={{ state, setSessionId, setChatbot, setModel, getModelName }}>
+                {children}
+            </ChatSessionContext.Provider>
+        );
     };
 
-    const setChatbot = (chatbot: string) => {
-        setState((prevState) => ({ ...prevState, chatbot }));
+    const useChatSession = (): IChatSessionContextProps => {
+        const context = useContext(ChatSessionContext);
+        if (context === undefined) {
+            throw new Error('useChatSession must be used within a ChatSessionProvider');
+        }
+        return context;
     };
 
-    const setModel = (model: string) => {
-        setState((prevState) => ({ ...prevState, model }));
-    };
+    return { ChatSessionProvider, useChatSession };
+}
 
-    const getModelName = (): string => {
-        return `${state.chatbot} ${state.model}`;
-    }
-
-    return (
-        <ChatSessionContext.Provider value={{ state, setSessionId, setChatbot, setModel, getModelName }}>
-            {children}
-        </ChatSessionContext.Provider>
-    );
-};
-
-export const useChatSession = (): IChatSessionContextProps => {
-    const context = useContext(ChatSessionContext);
-    if (context === undefined) {
-        throw new Error('useChatSession must be used within a ChatSessionProvider');
-    }
-    return context;
-};
+export const { ChatSessionProvider, useChatSession } = createChatSessionContext();

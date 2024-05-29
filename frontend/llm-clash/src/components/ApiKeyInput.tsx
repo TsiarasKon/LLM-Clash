@@ -3,7 +3,7 @@ import StyledInput from './styled/StyledInput';
 
 export interface IApiKeyInputProps {
     apiKey: string;
-    setApiKey: React.Dispatch<React.SetStateAction<string>>;
+    setApiKey: (apiKey: string) => void;
     disabled?: boolean;
 }
 
