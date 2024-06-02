@@ -1,8 +1,11 @@
 // TODO: refactor DTO proerties to camelCase ?
 
+import { IChatbot } from "@/types";
+
 export interface IInitSessionRequest {
 	api_key: string;
-    chatbot?: string;
+    chatbot?: IChatbot;
+    model?: string;
 }
 
 export interface IInitSessionResponse {

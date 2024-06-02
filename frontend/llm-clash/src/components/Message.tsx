@@ -2,7 +2,9 @@ import React from 'react';
 import user from '../assets/avatars/user.png';
 import chatGPT from '../assets/avatars/chatGPT.png';
 import claude from '../assets/avatars/claude.png';
+import llama from '../assets/avatars/llama.png';
 import { IMessage } from '@/types';
+import { Chatbots } from '@/constants';
 
 export interface IMessageProps {
     message: IMessage;
@@ -19,8 +21,9 @@ const Message: React.FC<IMessageProps> = ({ message }) => {
 
     const avatarUrl = {
         'User': user,
-        'ChatGPT': chatGPT,
-        'Claude': claude
+        [Chatbots.ChatGPT]: chatGPT,
+        [Chatbots.Claude]: claude,
+        [Chatbots.Llama]: llama
     }
 
     const avatarEl = (extraClasses: string) => <img src={avatarUrl[sender.avatar as keyof typeof avatarUrl].src} alt="Avatar" className={`w-8 h-8 rounded-full mb-1 ${extraClasses}`} />;

@@ -15,7 +15,7 @@ const ChatInterface: React.FC = () => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const initCurrentSession = () => {
-        initSession({ api_key: apiKey, chatbot: state.chatbot })
+        initSession({ api_key: apiKey, chatbot: state.chatbot, model: state.model })
             .then(response => {
                 setSessionId(response.data.session_id);
                 toast.success("Session initialized!");
@@ -24,6 +24,11 @@ const ChatInterface: React.FC = () => {
                 toast.error(`Failed to initialize session with error: ${error}`);
             });
     };
+
+    const resetSession = () => {
+        setMessages([]);
+        setSessionId('');
+    }
 
     const sendMessage = (text: string) => {
         setMessages([...messages, { sender: 'User', text: text }]);
@@ -56,11 +61,8 @@ const ChatInterface: React.FC = () => {
         <div className="flex flex-col h-screen">
             <div className="p-4 flex">
                 <ModelPicker chatbot={state.chatbot} setChatbot={setChatbot} model={state.model} setModel={setModel} apiKey={apiKey} setApiKey={setApiKey} disabled={!!state.sessionId} />
-                <StyledButton
-                    onClick={initCurrentSession}
-                    disabled={!!state.sessionId || !apiKey}
-                >
-                    {!state.sessionId ? 'Start Session' : 'In Session'}
+                <StyledButton onClick={!state.sessionId ? initCurrentSession : resetSession} color={!state.sessionId ? "gray" : "darkred"} disabled={!apiKey}>
+                    {!state.sessionId ? 'Start Session' : 'Reset Session'}
                 </StyledButton>
             </div>
             <div className="flex-grow overflow-auto p-4 pb-15">

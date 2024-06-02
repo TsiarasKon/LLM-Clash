@@ -22,7 +22,10 @@ const ClashInterface: React.FC = () => {
     const getModelBLabel = () => `Model B (${getModelNameB()})`;
 
     const initCurrentSession = () => {
-        initClashSession({ api_key: apiKeyA, chatbot: stateA.chatbot }, { api_key: apiKeyB, chatbot: stateB.chatbot }) 
+        initClashSession(
+            { api_key: apiKeyA, chatbot: stateA.chatbot, model: stateA.model },
+            { api_key: apiKeyB, chatbot: stateB.chatbot, model: stateB.model }
+        ) 
             .then(axios.spread((respA, respB) => {
                 setSessionIdA(respA.data.session_id);
                 setSessionIdB(respB.data.session_id);
@@ -32,6 +35,13 @@ const ClashInterface: React.FC = () => {
                 toast.error(`Failed to initialize session with error: ${errors}`);
             })
     };
+
+    const resetSession = () => {
+        setMessages([]);
+        setRound(0);
+        setSessionIdA('');
+        setSessionIdB('');
+    }
 
     const sendUserMessage = (text: string, modelA: boolean) => {
         setMessages([...messages, { sender: { type: 'User', name: `You (to ${modelA ? 'A' : 'B'})`, avatar: 'User' }, text: text }]);
@@ -100,11 +110,8 @@ const ClashInterface: React.FC = () => {
                     </div>
                     <ModelPicker chatbot={stateB.chatbot} setChatbot={setChatbotB} model={stateB.model} setModel={setModelB} apiKey={apiKeyB} setApiKey={setApiKeyB} disabled={!!stateB.sessionId} />
                 </div>
-                <StyledButton
-                    onClick={initCurrentSession}
-                    disabled={inSession() || !apiKeyA || !apiKeyB}
-                >
-                    {!inSession() ? 'Start Session' : 'In Session'}
+                <StyledButton onClick={inSession() ? resetSession : initCurrentSession} color={inSession() ? "darkred" : "gray"} disabled={!apiKeyA || !apiKeyB}>
+                    {!inSession() ? 'Start Session' : 'Reset Session'}
                 </StyledButton>
             </div>
             <div className="flex-grow overflow-auto p-4 pb-15">

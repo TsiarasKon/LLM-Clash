@@ -1,11 +1,11 @@
 import { DefaultChatbot, DefaultModel, Models } from '@/constants';
-import { ISession } from '@/types';
+import { IChatbot, ISession } from '@/types';
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface IChatSessionContextProps {
     state: ISession;
     setSessionId: (session: string) => void;
-    setChatbot: (chatbot: string) => void;
+    setChatbot: (chatbot: IChatbot) => void;
     setModel: (model: string) => void;
     getModelName: () => string;
 }
@@ -24,7 +24,7 @@ export const createChatSessionContext = () => {
             setState((prevState) => ({ ...prevState, sessionId }));
         };
 
-        const setChatbot = (chatbot: string) => {
+        const setChatbot = (chatbot: IChatbot) => {
             setState((prevState) => ({ ...prevState, chatbot }));
         };
 

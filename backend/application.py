@@ -1,6 +1,8 @@
+from enum import StrEnum
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openai import OpenAI
+from llamaapi import LlamaAPI
 import anthropic
 import os
 import uuid
@@ -9,22 +11,35 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 CORS(app)
 
+class Chatbot(StrEnum):
+    CHATGPT = "ChatGPT",
+    CLAUDE = "Claude",
+    LLAMA = "Llama",
+    GEMINI = "Gemini"
+
 messages = {}
 clients = {}
-default_chatbot = "ChatGPT"
+default_chatbot = Chatbot.CHATGPT
 default_model = {
-    'ChatGPT': "gpt-3.5-turbo",
-    'Claude': "claude-3-haiku-20240307"
+    Chatbot.CHATGPT: "gpt-3.5-turbo",
+    Chatbot.CLAUDE: "claude-3-haiku-20240307",
+    Chatbot.LLAMA: "llama3-8b",
+    Chatbot.GEMINI: "gemini-1.0-pro"
 }
 model_options = {
-    'ChatGPT': {
-        'max_tokens': 500,
+    Chatbot.CHATGPT: {
+        'max_tokens': 300,
         'temperature': 1.2
     },
-    'Claude': {
-        'max_tokens': 500,
-        'temperature': 0.5
-    }
+    Chatbot.CLAUDE: {
+        'max_tokens': 300,
+        'temperature': 0.6
+    },
+    Chatbot.LLAMA: {
+        'max_length': 300,
+        'temperature': 0.6
+    },
+    # Chatbot.GEMINI: {}
 }
 
 
@@ -47,10 +62,14 @@ def initSession():
         return jsonify({'response': 'Please provide an "api_key" to initialize your session.'})
     session_id = str(uuid.uuid4())
     chatbot = request.json.get('chatbot') or default_chatbot
-    if (chatbot == "ChatGPT"):
-        clients[session_id] = OpenAI(api_key=api_key)
-    else:
-        clients[session_id] = anthropic.Anthropic(api_key=api_key)
+    match chatbot:
+        case Chatbot.CHATGPT:
+            clients[session_id] = OpenAI(api_key=api_key)
+        case Chatbot.CLAUDE:
+            clients[session_id] = anthropic.Anthropic(api_key=api_key)
+        case Chatbot.LLAMA:
+            clients[session_id] = LlamaAPI(api_key)
+        # case Chatbot.GEMINI:
     messages[session_id] = []
     return jsonify({'session_id': session_id})
 
@@ -73,18 +92,24 @@ def chat():
     try:
         if (isinstance(clients[session_id], OpenAI)):
             response = clients[session_id].chat.completions.create(
-                model=request.json.get('model') or default_model['ChatGPT'],
+                model=request.json.get('model') or default_model[Chatbot.CHATGPT],
                 messages=messages[session_id],
-                **model_options['ChatGPT']
+                **model_options[Chatbot.CHATGPT]
             )
             response_message = response.choices[0].message.content
-        else:
+        elif (isinstance(clients[session_id], anthropic.Anthropic)):
             response = clients[session_id].messages.create(
-                model=request.json.get('model') or default_model['Claude'],
+                model=request.json.get('model') or default_model[Chatbot.CLAUDE],
                 messages=messages[session_id],
-                **model_options['Claude']
+                **model_options[Chatbot.CLAUDE]
             )
             response_message = response.content[0].text
+        elif (isinstance(clients[session_id], LlamaAPI)):
+            response = clients[session_id].run({
+                'model': request.json.get('model') or default_model[Chatbot.LLAMA],
+                'messages': messages[session_id],
+            } | model_options[Chatbot.LLAMA])
+            response_message = response.json()['choices'][0]['message']['content']
         messages[session_id].append({"role": "assistant", "content": response_message})
         return jsonify({'response': response_message})
     except Exception as e:

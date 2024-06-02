@@ -1,6 +1,10 @@
+import { Chatbots } from "./constants";
+
+export type IChatbot = `${Chatbots}`;
+
 export interface ISession {
     sessionId: string;
-    chatbot: string;
+    chatbot: IChatbot;
     model: string;
 }
 
