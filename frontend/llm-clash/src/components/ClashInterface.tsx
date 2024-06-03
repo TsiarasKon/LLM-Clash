@@ -6,8 +6,9 @@ import { toast } from 'react-toastify';
 import StyledButton from './styled/StyledButton';
 import axios from 'axios';
 import ModelPicker from './ModelPicker';
-import { IMessage, ISender } from '@/types';
+import { IChatbot, IMessage, ISender } from '@/types';
 import { useChatSessionA, useChatSessionB } from '@/context/ClashSessionContext';
+import ExperimentSession from '@/import';
 
 const ClashInterface: React.FC = () => {
     const { state: stateA, setSessionId: setSessionIdA, setChatbot: setChatbotA, setModel: setModelA, getModelName: getModelNameA } = useChatSessionA();
@@ -96,13 +97,26 @@ const ClashInterface: React.FC = () => {
         </div>;
 
     const downloadSession = () => {
-        const blob = new Blob([JSON.stringify({ stateA, stateB, messages }, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify({ stateA, stateB, round, messages }, null, 2)], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${stateA.chatbot}_${stateA.model} - ${stateB.chatbot}_${stateB.model}.json`;
+        link.download = `${stateA.chatbot}_${stateA.model} - ${stateB.chatbot}_${stateB.model} - R${round}.json`;
         link.click();
         window.URL.revokeObjectURL(url);
+    }
+
+    const loadSession = () => {
+        setMessages(ExperimentSession.messages as IMessage[]);
+        setRound(ExperimentSession.round);
+        setApiKeyA('-');
+        setChatbotA(ExperimentSession.stateA.chatbot as IChatbot);
+        setModelA(ExperimentSession.stateA.model);
+        setSessionIdA(ExperimentSession.stateA.sessionId);
+        setApiKeyB('-');
+        setChatbotB(ExperimentSession.stateB.chatbot as IChatbot);
+        setModelB(ExperimentSession.stateB.model);
+        setSessionIdB(ExperimentSession.stateB.sessionId);
     }
 
     return (
@@ -123,9 +137,15 @@ const ClashInterface: React.FC = () => {
                 <StyledButton onClick={inSession() ? resetSession : initCurrentSession} color={inSession() ? "darkred" : "gray"} disabled={!apiKeyA || !apiKeyB}>
                     {!inSession() ? 'Start Session' : 'Reset Session'}
                 </StyledButton>
-                <StyledButton disabled={!messages.length} extraClasses="ml-auto" onClick={downloadSession}>
-                    Download
-                </StyledButton>
+                <div className="ml-auto">
+                    {/* TODO: load only visible in debug */}
+                    <StyledButton disabled={!!messages.length} onClick={loadSession}>
+                        Load
+                    </StyledButton>
+                    <StyledButton disabled={!messages.length} onClick={downloadSession}>
+                        Download
+                    </StyledButton>
+                </div>
             </div>
             <div className="flex-grow overflow-auto p-4 pb-15">
                 {messages.map((message, index) => (
