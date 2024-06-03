@@ -95,6 +95,16 @@ const ClashInterface: React.FC = () => {
             </div>
         </div>;
 
+    const downloadSession = () => {
+        const blob = new Blob([JSON.stringify({ stateA, stateB, messages }, null, 2)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${stateA.chatbot}_${stateA.model} - ${stateB.chatbot}_${stateB.model}.json`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+    }
+
     return (
         <div className="flex flex-col h-screen">
             <div className="p-4 flex">
@@ -112,6 +122,9 @@ const ClashInterface: React.FC = () => {
                 </div>
                 <StyledButton onClick={inSession() ? resetSession : initCurrentSession} color={inSession() ? "darkred" : "gray"} disabled={!apiKeyA || !apiKeyB}>
                     {!inSession() ? 'Start Session' : 'Reset Session'}
+                </StyledButton>
+                <StyledButton disabled={!messages.length} extraClasses="ml-auto" onClick={downloadSession}>
+                    Download
                 </StyledButton>
             </div>
             <div className="flex-grow overflow-auto p-4 pb-15">
