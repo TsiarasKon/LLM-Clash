@@ -125,14 +125,15 @@ const ClashInterface: React.FC = () => {
                     </div>
                     <ModelPicker chatbot={stateB.chatbot} setChatbot={setChatbotB} model={stateB.model} setModel={setModelB} apiKey={apiKeyB} setApiKey={setApiKeyB} disabled={!!stateB.sessionId} />
                 </div>
-                <StyledButton onClick={inSession() ? resetSession : initCurrentSession} color={inSession() ? "darkred" : "gray"} disabled={!apiKeyA || !apiKeyB}>
+                <StyledButton onClick={inSession() ? resetSession : initCurrentSession} color={inSession() ? "darkred" : "gray"} disabled={!apiKeyA || !apiKeyB || isLoading}>
                     {!inSession() ? 'Start Session' : 'Reset Session'}
                 </StyledButton>
                 <div className="ml-auto">
-                    {/* TODO: load only visible in debug */}
-                    <StyledButton disabled={!!messages.length} onClick={loadSession}>
-                        Load
-                    </StyledButton>
+                    {process.env.NODE_ENV === 'development' && 
+                        <StyledButton onClick={loadSession}>
+                            Load
+                        </StyledButton>
+                    }
                     <StyledButton disabled={!messages.length} onClick={downloadSession}>
                         Download
                     </StyledButton>
