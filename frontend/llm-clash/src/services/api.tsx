@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { IChatRequest, IInitSessionRequest } from './types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 export const getMockMessage = () => {
     return axios.get(`${API_URL}/mock/chat`);
