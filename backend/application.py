@@ -1,5 +1,5 @@
 from enum import StrEnum
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from openai import OpenAI
 from llamaapi import LlamaAPI
@@ -7,7 +7,7 @@ import anthropic
 import os
 import uuid
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../frontend/llm-clash/out', static_url_path='/')
 app.secret_key = os.environ.get("SECRET_KEY")
 CORS(app)
 
@@ -29,7 +29,7 @@ default_model = {
 model_options = {
     Chatbot.CHATGPT: {
         'max_tokens': 300,
-        'temperature': 1.2
+        'temperature': 0.8
     },
     Chatbot.CLAUDE: {
         'max_tokens': 300,
@@ -44,8 +44,13 @@ model_options = {
 
 
 @app.route('/')
-def home():
-    return 'Welcome to LLM-Clash!'
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
+
+
+@app.errorhandler(404)
+def not_found(e):
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.route('/mock/chat')
@@ -86,7 +91,8 @@ def chat():
     user_input = request.json.get('message')
     if not user_input:
         return jsonify({'response': 'Please provide an input "message".'})
-    # messages[session_id].append({"role": "system" if request.json.get('system_prompt') else "user", "content": user_input})     # TODO
+    # system_condition = request.json.get('system_prompt') and not isinstance(clients[session_id], anthropic.Anthropic)
+    # messages[session_id].append({"role": "system" if system_condition else "user", "content": user_input})
     messages[session_id].append({"role": "user", "content": user_input})
 
     try:

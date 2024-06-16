@@ -3,7 +3,7 @@ services:
     name: llm-clash
     env: python
     buildCommand: pip install -r backend/requirements.txt && cd frontend/llm-clash && npm install && npm run build
-    startCommand: gunicorn --chdir backend app:app
+    startCommand: gunicorn --chdir backend application:app
     envVars:
       - key: FLASK_ENV
         value: production
