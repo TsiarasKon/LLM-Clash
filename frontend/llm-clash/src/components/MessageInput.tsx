@@ -18,7 +18,7 @@ const MessageInput: React.FC<IMessageInputProps> = ({ onSendMessage, placeholder
     };
 
     return (
-        <div className="p-4 w-full">
+        <div className="p-4 pb-0 w-full">
             <StyledInput
                 type="text"
                 value={inputText}

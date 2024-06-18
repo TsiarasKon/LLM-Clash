@@ -111,7 +111,7 @@ const ClashInterface: React.FC = () => {
     }
 
     return (
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col">
             <div className="p-4 flex">
                 <div className="flex flex-col pr-2">
                     <div className="text-sm text-gray-400">

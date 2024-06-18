@@ -8,7 +8,7 @@ interface IStyledLinkProps extends LinkProps {
 }
 
 const StyledLink: React.FC<IStyledLinkProps> = ({ children, disabled = false, extraClasses = '', ...props }) => {
-    const classes = `block max-w-sm m-4 p-6 border rounded-lg shadow bg-gray-800 border-gray-700 ${extraClasses} ${disabled
+    const classes = `block max-w-sm mx-5 mt-5 p-6 border rounded-lg shadow bg-gray-800 border-gray-700 ${extraClasses} ${disabled
         ? "opacity-50 cursor-default"
         : "hover:bg-gray-700"}`;
 

@@ -15,3 +15,21 @@
     border-radius: 10px;
     border: 2px solid #2c2c2c;
 }
+
+main {
+    > div:first-child {
+        height: 97vh;
+    }
+}
+
+footer {
+    height: 2vh;
+    text-align: center;
+    color: #888;
+    margin: 0.5vh auto;
+    
+    a {
+        text-decoration: underline;
+        color: #aaa;
+    }
+}

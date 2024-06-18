@@ -49,7 +49,7 @@ const ChatInterface: React.FC = () => {
     }, [messages]);
 
     return (
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col">
             <div className="p-4 flex">
                 <ModelPicker chatbot={state.chatbot} setChatbot={setChatbot} model={state.model} setModel={setModel} apiKey={apiKey} setApiKey={setApiKey} disabled={!!state.sessionId} />
                 <StyledButton onClick={!state.sessionId ? initCurrentSession : resetSession} color={!state.sessionId ? "gray" : "darkred"} disabled={!apiKey}>
