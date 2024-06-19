@@ -2,7 +2,7 @@ export enum Chatbots {
     ChatGPT = "ChatGPT",
     Claude = "Claude",
     Llama = "Llama",
-    Gemini = "Gemini",
+    // Gemini = "Gemini",
 }
 
 export const Models = {
@@ -18,7 +18,7 @@ export const Models = {
         { value: "llama3-8b", text: "3-8b" },
         { value: "llama3-70b", text: "3-70b" }
     ],
-    [Chatbots.Gemini]: [{ value: "gemini-1.0-pro", text: "1.0" }],
+    // [Chatbots.Gemini]: [{ value: "gemini-1.0-pro", text: "1.0" }],
 };
 
 export const DefaultChatbot = Chatbots.ChatGPT;

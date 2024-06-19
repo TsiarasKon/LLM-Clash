@@ -10,6 +10,7 @@ import { IChatbot, IMessage, ISender } from '@/types';
 import { useChatSessionA, useChatSessionB } from '@/context/ClashSessionContext';
 import ExperimentSession from '@/import';
 import LoadingSpinner from './LoadingSpinner';
+import DisclaimerModal from './DisclaimerModal';
 
 const ClashInterface: React.FC = () => {
     const { state: stateA, setSessionId: setSessionIdA, setChatbot: setChatbotA, setModel: setModelA, getModelName: getModelNameA } = useChatSessionA();
@@ -162,6 +163,8 @@ const ClashInterface: React.FC = () => {
                     placeholder={`Send initial prompt to model ${round === 0 ? 'A' : 'B'}`} 
                 />
             }
+
+            <DisclaimerModal />
         </div>
     );
 };

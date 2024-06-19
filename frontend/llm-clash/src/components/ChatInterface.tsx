@@ -7,6 +7,7 @@ import StyledButton from './styled/StyledButton';
 import ModelPicker from './ModelPicker';
 import { useChatSession } from '@/context/ChatSessionContext';
 import LoadingSpinner from './LoadingSpinner';
+import DisclaimerModal from './DisclaimerModal';
 
 const ChatInterface: React.FC = () => {
     const { state, setSessionId, setChatbot, setModel, getModelName } = useChatSession();
@@ -64,6 +65,8 @@ const ChatInterface: React.FC = () => {
                 <div ref={messagesEndRef} />
             </div>
             <MessageInput onSendMessage={sendMessage} disabled={isLoading || !state.sessionId} />
+
+            <DisclaimerModal />
         </div>
     );
 };
