@@ -19,7 +19,7 @@ const DisclaimerModal: React.FC = () => {
                         Jailground allows you to chat with LLMs created by OpenAI, Anthropic and Meta. 
                         The outputs of those LLMs may not always be correct, complete, or up-to-date and are not intended to replace professional advice at any capacity. 
                         Furthermore, any prompt provided to them may be processed for training purposes or other purposes.
-                        For more information consult those companies' respective privacy polices.
+                        For more information consult those companies&apos; respective privacy polices.
                     </p>
                     <p className="text-base leading-relaxed text-gray-400">
                         Jailground was created for the purposes of research on LLM interactions.
