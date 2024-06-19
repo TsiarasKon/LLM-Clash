@@ -18,17 +18,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     return (
         <html lang="en">
             <body className={inter.className} style={{ backgroundColor: '#212121' }}>
-                <React.StrictMode>
-                    <Flowbite theme={{ mode: 'dark' }}>
-                        <main>
-                            {children}
-                            <ToastContainer autoClose={4000} newestOnTop theme="dark" />
-                        </main>
-                        <footer>
-                            <p>© 2024 <a href="https://github.com/TsiarasKon/LLM-Clash" target="_blank" rel="noreferrer">Konstantinos Tsiaras</a>. All rights reserved.</p>
-                        </footer>
-                    </Flowbite>
-                </React.StrictMode>
+                <Flowbite theme={{ mode: 'dark' }}>
+                    <main>
+                        {children}
+                        <ToastContainer autoClose={4000} newestOnTop theme="dark" />
+                    </main>
+                    <footer>
+                        <p>© 2024 <a href="https://github.com/TsiarasKon/LLM-Clash" target="_blank" rel="noreferrer">Konstantinos Tsiaras</a>. All rights reserved.</p>
+                    </footer>
+                </Flowbite>
             </body>
         </html>
     );
